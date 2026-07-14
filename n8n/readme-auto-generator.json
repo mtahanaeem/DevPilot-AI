@@ -1,0 +1,59 @@
+{
+  "name": "README Auto-Generator",
+  "nodes": [
+    {
+      "id": "readme-schedule",
+      "name": "Daily Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 24 }]
+        }
+      }
+    },
+    {
+      "id": "list-repos",
+      "name": "List Repos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "http://fastapi:8000/repositories",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer devpilot-api-key-2026"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "success-end",
+      "name": "Done",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Daily Check": {
+      "main": [[{ "node": "List Repos", "type": "main", "index": 0 }]]
+    },
+    "List Repos": {
+      "main": [[{ "node": "Done", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": true,
+  "tags": []
+}

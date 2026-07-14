@@ -1,0 +1,83 @@
+{
+  "name": "Health Monitor",
+  "nodes": [
+    {
+      "id": "health-schedule",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 5 }]
+        }
+      }
+    },
+    {
+      "id": "health-request",
+      "name": "GET /health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "http://fastapi:8000/health",
+        "authentication": "none",
+        "options": {}
+      }
+    },
+    {
+      "id": "check-status",
+      "name": "Is Healthy?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "equal",
+              "value2": "healthy"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "healthy-end",
+      "name": "All Good",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "parameters": {}
+    },
+    {
+      "id": "alert-end",
+      "name": "Alert (Unhealthy)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [850, 400],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [[{ "node": "GET /health", "type": "main", "index": 0 }]]
+    },
+    "GET /health": {
+      "main": [[{ "node": "Is Healthy?", "type": "main", "index": 0 }]]
+    },
+    "Is Healthy?": {
+      "main": [
+        [{ "node": "All Good", "type": "main", "index": 0 }],
+        [{ "node": "Alert (Unhealthy)", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": true,
+  "tags": []
+}

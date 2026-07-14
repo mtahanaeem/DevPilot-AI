@@ -1,0 +1,83 @@
+{
+  "name": "Repository Monitor",
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Hourly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 1 }]
+        }
+      }
+    },
+    {
+      "id": "sync-request",
+      "name": "Sync Repos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "http://fastapi:8000/repositories/sync",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer devpilot-api-key-2026"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "stale-request",
+      "name": "Flag Stale",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [650, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "http://fastapi:8000/repositories/stale?days=90",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer devpilot-api-key-2026"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "success-end",
+      "name": "Done",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Hourly Schedule": {
+      "main": [[{ "node": "Sync Repos", "type": "main", "index": 0 }]]
+    },
+    "Sync Repos": {
+      "main": [[{ "node": "Flag Stale", "type": "main", "index": 0 }]]
+    },
+    "Flag Stale": {
+      "main": [[{ "node": "Done", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": true,
+  "tags": []
+}
