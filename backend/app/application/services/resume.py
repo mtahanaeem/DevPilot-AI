@@ -66,17 +66,21 @@ async def get_job(session: AsyncSession, job_id: Any, user_id: Any) -> JobDescri
 
 
 async def optimize_resume(
-    session: AsyncSession, resume_id: Any, job_id: Any, user_id: Any
+    session: AsyncSession, resume_id: Any, job_id: Any, user_id: Any, job_text: str | None = None
 ) -> dict:
     resume = await get_resume(session, resume_id, user_id)
-    job = await get_job(session, job_id, user_id)
+    if job_text:
+        job_raw = job_text
+    else:
+        job = await get_job(session, job_id, user_id)
+        job_raw = job.raw_text
 
     llm = get_llm_provider()
     prompt = f"""Current Resume:
 {resume.raw_text}
 
 Target Job Description:
-{job.raw_text}
+{job_raw}
 
 Analyze the resume against the job description and provide:
 1. A match score (0-100)
@@ -102,17 +106,21 @@ Return as structured Markdown."""
 
 
 async def score_match(
-    session: AsyncSession, resume_id: Any, job_id: Any, user_id: Any
+    session: AsyncSession, resume_id: Any, job_id: Any, user_id: Any, job_text: str | None = None
 ) -> dict:
     resume = await get_resume(session, resume_id, user_id)
-    job = await get_job(session, job_id, user_id)
+    if job_text:
+        job_raw = job_text
+    else:
+        job = await get_job(session, job_id, user_id)
+        job_raw = job.raw_text
 
     llm = get_llm_provider()
     prompt = f"""Resume:
 {resume.raw_text}
 
 Job Description:
-{job.raw_text}
+{job_raw}
 
 Rate the match between this resume and job description from 0-100.
 Consider: skills match, experience level, keyword alignment, and overall fit.

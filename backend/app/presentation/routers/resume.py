@@ -127,20 +127,22 @@ async def auto_detect_jobs(
 @router.post("/{resume_id}/optimize")
 async def optimize_resume(
     resume_id: str,
-    job_id: str = Query(...),
+    job_id: str = Query(""),
+    job_text: str = Query(""),
     user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
 ) -> SuggestionOut:
-    result = await resume_service.optimize_resume(session, resume_id, job_id, user["id"])
+    result = await resume_service.optimize_resume(session, resume_id, job_id, user["id"], job_text or None)
     return SuggestionOut(**result)
 
 
 @router.post("/{resume_id}/score")
 async def score_resume(
     resume_id: str,
-    job_id: str = Query(...),
+    job_id: str = Query(""),
+    job_text: str = Query(""),
     user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
 ) -> ScoreOut:
-    result = await resume_service.score_match(session, resume_id, job_id, user["id"])
+    result = await resume_service.score_match(session, resume_id, job_id, user["id"], job_text or None)
     return ScoreOut(**result)

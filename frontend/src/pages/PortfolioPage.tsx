@@ -29,6 +29,24 @@ interface Portfolio {
   repositories: PortfolioItem[];
 }
 
+const TOKEN_KEY = "devpilot_token";
+
+async function downloadExport(fmt: string) {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) return;
+  const res = await fetch(`/api/portfolio/export?fmt=${fmt}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return;
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `portfolio.${fmt}`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function PortfolioPage() {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,27 +64,15 @@ export function PortfolioPage() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Portfolio</h2>
         <div className="flex gap-2">
-          <a
-            href="/api/portfolio/export?fmt=json"
-            target="_blank"
-            className="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors"
-          >
+          <button onClick={() => downloadExport("json")} className="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors cursor-pointer">
             JSON
-          </a>
-          <a
-            href="/api/portfolio/export?fmt=markdown"
-            target="_blank"
-            className="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors"
-          >
+          </button>
+          <button onClick={() => downloadExport("markdown")} className="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors cursor-pointer">
             Markdown
-          </a>
-          <a
-            href="/api/portfolio/export?fmt=html"
-            target="_blank"
-            className="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors"
-          >
+          </button>
+          <button onClick={() => downloadExport("html")} className="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors cursor-pointer">
             HTML
-          </a>
+          </button>
         </div>
       </div>
 

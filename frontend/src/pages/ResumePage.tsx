@@ -21,6 +21,7 @@ export function ResumePage() {
   const [sourceUrl, setSourceUrl] = useState("");
   const [selectedResume, setSelectedResume] = useState("");
   const [selectedJob, setSelectedJob] = useState("");
+  const [customJobText, setCustomJobText] = useState("");
   const [suggestion, setSuggestion] = useState<SuggestionResult | null>(null);
   const [score, setScore] = useState<ScoreResult | null>(null);
   const [submitting, setSubmitting] = useState("");
@@ -72,15 +73,17 @@ export function ResumePage() {
   }
 
   async function handleOptimize() {
-    if (!selectedResume || !selectedJob) return;
+    const jobId = selectedJob;
+    const jobText = customJobText.trim();
+    if (!selectedResume || (!jobId && !jobText)) return;
     setSubmitting("optimize");
     setError("");
     setSuggestion(null);
     setScore(null);
     try {
       const [s, sc] = await Promise.all([
-        optimizeResume(selectedResume, selectedJob),
-        scoreResume(selectedResume, selectedJob),
+        optimizeResume(selectedResume, jobId, jobText),
+        scoreResume(selectedResume, jobId, jobText),
       ]);
       setSuggestion(s);
       setScore(sc);
@@ -157,7 +160,7 @@ export function ResumePage() {
       <div className="bg-gray-800 rounded p-4 border border-gray-700 mb-6">
         <h3 className="font-semibold mb-3">Optimize Resume</h3>
         <div className="flex flex-wrap gap-3 items-end">
-          <div>
+          <div className="w-full">
             <label className="block text-xs text-gray-400 mb-1">Resume</label>
             <select
               value={selectedResume}
@@ -172,14 +175,26 @@ export function ResumePage() {
               ))}
             </select>
           </div>
-          <div>
+          <div className="w-full">
             <label className="block text-xs text-gray-400 mb-1">Job Description</label>
+            <textarea
+              value={customJobText}
+              onChange={(e) => { setCustomJobText(e.target.value); setSelectedJob(""); }}
+              placeholder="Paste a job description directly..."
+              rows={4}
+              className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 text-sm mb-2"
+            />
+            <div className="flex items-center gap-2 text-gray-500 text-xs mb-2">
+              <span className="flex-1 h-px bg-gray-600" />
+              <span>OR select a saved job</span>
+              <span className="flex-1 h-px bg-gray-600" />
+            </div>
             <select
               value={selectedJob}
-              onChange={(e) => setSelectedJob(e.target.value)}
-              className="px-3 py-2 rounded bg-gray-700 border border-gray-600 text-sm min-w-[200px]"
+              onChange={(e) => { setSelectedJob(e.target.value); setCustomJobText(""); }}
+              className="px-3 py-2 rounded bg-gray-700 border border-gray-600 text-sm w-full"
             >
-              <option value="">Select a job...</option>
+              <option value="">Select a saved job...</option>
               {jobs.map((j) => (
                 <option key={j.id} value={j.id}>
                   {j.created_at.slice(0, 10)} — {j.raw_text.slice(0, 50)}...
@@ -189,7 +204,7 @@ export function ResumePage() {
           </div>
           <button
             onClick={handleOptimize}
-            disabled={!selectedResume || !selectedJob || submitting === "optimize"}
+            disabled={!selectedResume || (!selectedJob && !customJobText.trim()) || submitting === "optimize"}
             className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-sm transition-colors"
           >
             {submitting === "optimize" ? "Analyzing..." : "Analyze Match"}

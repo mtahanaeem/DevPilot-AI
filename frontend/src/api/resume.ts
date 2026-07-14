@@ -54,10 +54,16 @@ export function autoDetectJobs(): Promise<JobDescription[]> {
   return post<JobDescription[]>("/resume/jobs/auto-detect");
 }
 
-export function optimizeResume(resumeId: string, jobId: string): Promise<SuggestionResult> {
-  return post<SuggestionResult>(`/resume/${resumeId}/optimize?job_id=${jobId}`);
+export function optimizeResume(resumeId: string, jobId: string, jobText = ""): Promise<SuggestionResult> {
+  const params = new URLSearchParams();
+  if (jobText) params.set("job_text", jobText);
+  else params.set("job_id", jobId);
+  return post<SuggestionResult>(`/resume/${resumeId}/optimize?${params}`);
 }
 
-export function scoreResume(resumeId: string, jobId: string): Promise<ScoreResult> {
-  return post<ScoreResult>(`/resume/${resumeId}/score?job_id=${jobId}`);
+export function scoreResume(resumeId: string, jobId: string, jobText = ""): Promise<ScoreResult> {
+  const params = new URLSearchParams();
+  if (jobText) params.set("job_text", jobText);
+  else params.set("job_id", jobId);
+  return post<ScoreResult>(`/resume/${resumeId}/score?${params}`);
 }
