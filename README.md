@@ -227,7 +227,7 @@ DevPilot-AI/
 <div align="center">
 
 [![GitHub](https://img.shields.io/badge/GitHub-mtahanaeem-181717?logo=github)](https://github.com/mtahanaeem)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?logo=linkedin)](https://linkedin.com/in/mtahanaeem)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?logo=linkedin)]([https://linkedin.com/in/mtahanaeem](https://www.linkedin.com/in/heyitxtaha))
 
 **If you find this project useful, consider giving it a ⭐!**
 
